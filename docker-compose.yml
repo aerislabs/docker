@@ -28,8 +28,7 @@ services:
     image: antoligy/php7-fpm
     container_name: aeris-php-fpm
     volumes:
-      - ..:/var/www/app
-      - ./php-fpm/php-ini-overrides.ini:/etc/php/7.0/fpm/conf.d/99-overrides.ini
+      - ./aeris:/var/www/app
     links:
       - aeris-postgres
       - aeris-redis
