@@ -1,0 +1,47 @@
+version: "2"
+services:
+
+  aeris-redis:
+    image: redis:alpine
+    container_name: aeris-redis
+
+  aeris-postgres:
+    image: postgres
+    container_name: aeris-postgres
+    environment:
+      - POSTGRES_USER=db
+      - POSTGRES_PASSWORD=CHANGETHISSECRET
+      - POSTGRES_DB=app
+
+  aeris-nginx:
+    image: phpdockerio/nginx:latest
+    container_name: aeris-nginx
+    volumes:
+      - ./aeris:/var/www/app
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/aeris.conf
+    ports:
+      - "80:80"
+    links:
+      - aeris-php-fpm
+
+  aeris-php-fpm:
+    image: antoligy/php7-fpm
+    container_name: aeris-php-fpm
+    volumes:
+      - ..:/var/www/app
+      - ./php-fpm/php-ini-overrides.ini:/etc/php/7.0/fpm/conf.d/99-overrides.ini
+    links:
+      - aeris-postgres
+      - aeris-redis
+
+  aeris-elk:
+    image: willdurand/elk
+    ports:
+      - "81:80"
+    volumes:
+      - ./elk/logstash:/etc/logstash
+      - ./elk/logstash/patterns:/opt/logstash/patterns
+    volumes_from:
+      - aeris-php-fpm
+      - aeris-nginx
+
